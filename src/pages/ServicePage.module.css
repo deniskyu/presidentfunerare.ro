@@ -1,0 +1,12 @@
+.intro { padding-block: var(--section-y); }
+.text { max-width: 820px; margin: var(--space-6) auto 0; }
+.text p { font-size: var(--fs-lead); line-height: 1.8; color: #3a342c; }
+.text strong { color: var(--gold-deep); }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: clamp(1rem, 2vw, 1.5rem); margin-top: var(--space-8); }
+.card { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--gold); border-radius: var(--radius); padding: 1.4rem 1.5rem; box-shadow: var(--shadow-sm); transition: transform var(--t-fast), box-shadow var(--t-fast); }
+.card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+.cardTitle { font-family: var(--font-display); font-size: var(--fs-h3); font-weight: 600; color: var(--ink); margin: 0 0 .4rem; }
+.cardText { color: var(--muted); line-height: 1.65; margin: 0; }
+.gallerySection { padding-block: var(--section-y); background: var(--cream); }
+.galleryWrap { margin-top: var(--space-8); }
+.cta { display: flex; justify-content: center; margin-top: var(--space-8); }

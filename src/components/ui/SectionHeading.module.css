@@ -1,0 +1,24 @@
+.heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+  max-width: 760px;
+  margin-inline: auto;
+}
+.eyebrow {
+  margin: 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: var(--fs-lead);
+  color: var(--gold-deep);
+  letter-spacing: .01em;
+}
+.title { margin: 0; }
+.light .eyebrow { color: var(--gold-bright); }
+.light .title { color: var(--on-dark); }
+
+.ornament { display: inline-flex; align-items: center; gap: 10px; margin-top: var(--space-2); }
+.line { width: clamp(34px, 8vw, 48px); height: 1px; background: var(--gold); opacity: .55; }
+.diamond { width: 7px; height: 7px; background: var(--gold); transform: rotate(45deg); }

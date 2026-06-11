@@ -1,0 +1,9 @@
+.section { padding-block: var(--section-y); }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(1rem, 2vw, 1.5rem); margin-top: var(--space-8); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: clamp(1.5rem, 2.5vw, 2.2rem); text-align: center; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; align-items: center; gap: var(--space-3); transition: transform var(--t), box-shadow var(--t); }
+.card:hover { transform: translateY(-6px); box-shadow: var(--shadow); }
+.icon { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: rgba(182,138,62,.12); color: var(--gold-deep); margin-bottom: .3rem; }
+.cardTitle { font-family: var(--font-display); font-size: var(--fs-h3); font-weight: 600; color: var(--ink); margin: 0; }
+.cardText { color: var(--muted); line-height: 1.7; margin: 0; }
+@media (max-width: 64em) { .grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 40em) { .grid { grid-template-columns: 1fr; } }

@@ -1,0 +1,9 @@
+.banner { background-color: var(--ink); background-size: cover; background-position: center; color: var(--on-dark); text-align: center; padding-block: clamp(3.5rem, 8vw, 6rem); }
+.eyebrow { font-family: var(--font-display); font-style: italic; font-size: var(--fs-lead); color: var(--gold-bright); margin: 0 0 .5rem; }
+.title { color: #fff; margin: 0 auto; max-width: 20ch; }
+.sub { color: rgba(255,255,255,.82); max-width: 52ch; margin: 1.1rem auto 0; font-size: var(--fs-lead); }
+.phones { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem 2.5rem; margin-top: 2.2rem; }
+.phone { display: inline-flex; align-items: center; gap: .7rem; font-family: var(--font-display); font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 600; color: #fff; transition: color var(--t-fast); }
+.phone:hover { color: var(--gold-bright); }
+.icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--gold); color: var(--gold-bright); flex-shrink: 0; }
+@media (max-width: 40em) { .phones { flex-direction: column; align-items: center; gap: 1.2rem; } }

@@ -1,0 +1,4 @@
+.section { background-color: var(--ink); background-size: cover; background-position: center; color: var(--on-dark); text-align: center; padding-block: clamp(3.5rem, 8vw, 6rem); }
+.eyebrow { font-family: var(--font-display); font-style: italic; font-size: var(--fs-lead); color: var(--gold-bright); margin: 0 0 .5rem; }
+.title { color: #fff; margin: 0 auto; }
+.text { color: rgba(255,255,255,.82); max-width: 60ch; margin: 1.1rem auto 2rem; font-size: var(--fs-lead); line-height: 1.7; }

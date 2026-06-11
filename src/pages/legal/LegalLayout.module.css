@@ -1,0 +1,12 @@
+.section { padding-block: var(--section-y); }
+.eyebrow { font-family: var(--font-display); font-style: italic; font-size: var(--fs-lead); color: var(--gold-deep); margin: 0 0 .3rem; }
+.title { font-size: var(--fs-h1); margin: 0 0 var(--space-6); color: var(--ink); }
+.prose { max-width: 760px; color: #3a342c; line-height: 1.8; }
+.prose h2 { font-family: var(--font-display); font-size: var(--fs-h2); font-weight: 600; color: var(--ink); margin: 2.2rem 0 .8rem; }
+.prose p { margin: 0 0 1.1rem; }
+.prose ul { margin: 0 0 1.1rem; padding-left: 1.4rem; }
+.prose li { margin-bottom: .5rem; }
+.prose a { color: var(--gold-deep); text-decoration: underline; text-underline-offset: 3px; }
+.prose a:hover { color: var(--gold); }
+.prose strong { color: var(--ink); }
+.prose em { color: var(--muted); }

@@ -1,0 +1,19 @@
+.call {
+  display: inline-flex; align-items: center; gap: .7rem;
+  padding: .7rem 1.25rem; border-radius: 999px;
+  font-family: var(--font-body); font-weight: 600; line-height: 1.1;
+  border: 1px solid transparent;
+  transition: transform var(--t-fast), box-shadow var(--t-fast), background var(--t-fast), border-color var(--t-fast);
+}
+.icon { display: inline-flex; }
+.text { display: inline-flex; flex-direction: column; }
+.label { font-size: .72rem; font-weight: 500; opacity: .85; letter-spacing: .04em; text-transform: uppercase; }
+.number { font-size: 1.05rem; white-space: nowrap; }
+
+.solid { background: var(--gold-grad); color: #20170A; box-shadow: 0 10px 26px -12px rgba(182,138,62,.7); }
+.solid:hover { transform: translateY(-2px); box-shadow: 0 16px 32px -12px rgba(182,138,62,.85); }
+.ghost { background: transparent; color: var(--on-dark); border-color: rgba(255,255,255,.35); }
+.ghost .label { color: var(--gold-bright); opacity: 1; }
+.ghost:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.6); }
+
+@media (max-width: 30em) { .call { padding: .65rem 1.1rem; } .number { font-size: 1rem; } }

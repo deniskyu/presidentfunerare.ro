@@ -1,0 +1,13 @@
+.bar { background: #0E0B08; font-size: .85rem; border-bottom: 1px solid rgba(255,255,255,.06); }
+.inner { display: flex; align-items: center; gap: 1.5rem; min-height: 42px; }
+.item { display: inline-flex; align-items: center; gap: .45rem; color: var(--on-dark-dim); transition: color var(--t-fast); }
+.item svg { color: var(--gold); }
+.item:hover { color: #fff; }
+.hours { margin-left: auto; color: var(--gold-bright); letter-spacing: .03em; }
+
+@media (max-width: 40em) {
+  .email { display: none; }
+  .inner { justify-content: space-between; gap: .75rem; }
+  .hours { margin-left: 0; }
+}
+@media (max-width: 26em) { .hours { display: none; } }
