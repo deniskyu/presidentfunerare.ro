@@ -1,0 +1,18 @@
+# === Cache ===
+# Fișiere cu hash în nume (JS, CSS, fonturi, imaginile importate din src) — cache 1 an
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Imaginile din public/ (nu au hash) — cache 1 săptămână
+/og-image.jpg
+  Cache-Control: public, max-age=604800
+/logo.png
+  Cache-Control: public, max-age=604800
+/favicon.png
+  Cache-Control: public, max-age=604800
+
+# === Securitate (opțional, dar recomandat) ===
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
