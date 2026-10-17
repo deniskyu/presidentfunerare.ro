@@ -1,0 +1,6 @@
+# Copiați fișierul ca .dev.vars pentru rulare locală (npm run dev). Nu se pune pe GitHub.
+SESSION_SECRET=un-sir-lung-aleator-doar-pentru-local
+ADMIN_USER=admin
+ADMIN_PASSWORD=parola-locala-123
+# 1 = nu contactează SMSLink, doar simulează trimiterea
+SMS_MOCK=1
