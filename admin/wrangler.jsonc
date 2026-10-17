@@ -20,7 +20,7 @@
     {
       "binding": "DB",
       "database_name": "president-admin",
-      "database_id": "3f2268ee-eb6b-44d6-9907-3309977adbc4",
+      "database_id": "c24218f4-288c-4a33-ab4c-f647f9a7b1c0",
       "migrations_dir": "migrations"
     }
   ],
