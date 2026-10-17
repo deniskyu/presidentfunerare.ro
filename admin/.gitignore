@@ -1,0 +1,6 @@
+node_modules
+.wrangler
+.dev.vars
+# Date cu persoane și telefoane: nu se pun pe GitHub
+date/
+*.csv

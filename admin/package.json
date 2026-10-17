@@ -1,0 +1,14 @@
+{
+  "name": "president-admin",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --test-scheduled",
+    "db:local": "wrangler d1 migrations apply president-admin --local",
+    "db:remote": "wrangler d1 migrations apply president-admin --remote",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.151.1"
+  }
+}
