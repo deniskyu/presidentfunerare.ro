@@ -1,6 +1,8 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "president-admin",
+  // Contul Cloudflare în care e domeniul (dnydeniz0@gmail.com)
+  "account_id": "6b065334d51f118b974775d82ea04eb1",
   "main": "src/index.js",
   "compatibility_date": "2025-10-01",
 
