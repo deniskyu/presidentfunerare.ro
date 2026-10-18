@@ -26,7 +26,7 @@ import {
   randeazaMesaj,
 } from './pomeni.js';
 import { citesteSetari } from './setari.js';
-import { numaraTrimise, ruleazaTrimiterea, trimiteSms, verificaCredit } from './sms.js';
+import { curataIstoric, numaraTrimise, ruleazaTrimiterea, trimiteSms, verificaCredit } from './sms.js';
 
 class Eroare extends Error {
   constructor(status, mesaj) {
@@ -102,6 +102,8 @@ export default {
   async scheduled(controller, env, ctx) {
     // Cron-ul pornește din oră în oră; trimitem doar între 10:00 și 18:59, ora României (vara și iarna).
     const ora = Number(new Intl.DateTimeFormat('en-GB', { timeZone: FUS_ORAR, hour: '2-digit', hour12: false }).format(new Date()));
+    // Curățenia anuală a istoricului poate rula la orice oră (nu trimite nimic)
+    ctx.waitUntil(curataIstoric(env.DB));
     if (ora < 10 || ora >= 19) return;
     ctx.waitUntil(
       (async () => {
@@ -580,6 +582,7 @@ ruta(
       ani_max: Number(s.ani_max),
       mesaj: s.mesaj,
       exemple: exempluMesaj(s.mesaj),
+      ultima_curatare: s.ultima_curatare ? JSON.parse(s.ultima_curatare) : null,
     });
   },
   { admin: true },

@@ -41,8 +41,8 @@ export async function numaraTrimise(db, n) {
   await db
     .prepare(
       `INSERT INTO setari (cheie, valoare)
-       SELECT value, ?1 FROM json_each(?2) WHERE true
-       ON CONFLICT(cheie) DO UPDATE SET valoare = CAST(valoare AS INTEGER) + ?1`,
+       SELECT value, CAST(?1 AS INTEGER) FROM json_each(?2) WHERE true
+       ON CONFLICT(cheie) DO UPDATE SET valoare = CAST(valoare AS INTEGER) + CAST(?1 AS INTEGER)`,
     )
     .bind(n, JSON.stringify(['sms_trimise_total', `sms_trimise_${aziRO().slice(0, 7)}`]))
     .run();
@@ -194,5 +194,37 @@ export async function ruleazaTrimiterea(env, { motiv = 'cron' } = {}) {
   await scrieSetare(db, 'ultima_rulare', JSON.stringify(rezultat));
   // După ce au plecat SMS-uri, actualizăm și creditul afișat în panou
   if (rezultat.trimise) await verificaCredit(env);
+  return rezultat;
+}
+
+const UN_AN_MS = 365 * 24 * 3600 * 1000;
+
+/**
+ * O dată pe an șterge din istoric SMS-urile mai vechi de un an (și pomenile trecute de peste un an
+ * care nu mai au ce trimite). Persoanele și contorul total de SMS-uri rămân neatinse.
+ * Rulează la prima verificare automată de după împlinirea unui an de la ștergerea precedentă.
+ */
+export async function curataIstoric(db, { fortat = false } = {}) {
+  const rand = await db.prepare(`SELECT valoare FROM setari WHERE cheie = 'ultima_curatare'`).first();
+  const acum = new Date();
+  if (!fortat && rand && acum - new Date(JSON.parse(rand.valoare).la) < UN_AN_MS) return null;
+
+  const limitaMoment = new Date(acum - UN_AN_MS).toISOString();
+  const limitaData = adaugaZile(aziRO(acum), -365);
+  const [pomeni] = await db.batch([
+    db
+      .prepare(
+        `DELETE FROM pomeni
+         WHERE (status = 'trimis' AND trimis_la < ?1)
+            OR (status IN ('asteptare', 'anulat', 'eroare') AND data_pomana < ?2)`,
+      )
+      .bind(limitaMoment, limitaData),
+    // contoarele lunare mai vechi de un an (totalul rămâne)
+    db
+      .prepare(`DELETE FROM setari WHERE cheie GLOB 'sms_trimise_[0-9][0-9][0-9][0-9]-[0-9][0-9]' AND cheie < ?`)
+      .bind(`sms_trimise_${limitaData.slice(0, 7)}`),
+  ]);
+  const rezultat = { la: acum.toISOString(), sterse: pomeni.meta.changes };
+  await scrieSetare(db, 'ultima_curatare', JSON.stringify(rezultat));
   return rezultat;
 }

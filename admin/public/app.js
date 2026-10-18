@@ -793,7 +793,7 @@
   // ---------- Pagina: istoric SMS ----------
   async function paginaSms() {
     main.innerHTML = `
-      <div class="titlu-pagina"><div><h1>SMS-uri trimise</h1><p class="subtitlu">Cele mai recente primele.</p></div></div>
+      <div class="titlu-pagina"><div><h1>SMS-uri trimise</h1><p class="subtitlu">Cele mai recente primele. SMS-urile mai vechi de un an se șterg automat din listă, o dată pe an; totalul de pe pagina principală rămâne.</p></div></div>
       <ul class="lista" id="lista"></ul>
       <div class="paginare"><button class="btn btn-secundar" id="mai-multe" hidden>Arată mai multe</button></div>`;
     const lista = main.querySelector('#lista');
@@ -896,6 +896,9 @@
           <button class="btn btn-secundar" id="ruleaza" type="button">Trimite acum SMS-urile programate</button>
         </div>
         <p class="mic slab" id="rezultat-verificari" style="margin-top:12px"></p>
+        <hr class="separator">
+        <p class="mic slab" style="margin:0">Istoricul SMS-urilor mai vechi de un an se șterge automat, o dată pe an. Persoanele și totalul de SMS-uri trimise rămân.
+        ${s.ultima_curatare ? `Ultima ștergere: ${esc(dataOra(s.ultima_curatare.la))}, ${plural(s.ultima_curatare.sterse, 'înregistrare ștearsă', 'înregistrări șterse')}.` : ''}</p>
       </div>`;
 
     const form = main.querySelector('#form-setari');
