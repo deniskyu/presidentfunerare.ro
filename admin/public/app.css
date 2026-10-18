@@ -339,3 +339,20 @@ td.motiv { color: var(--bad); white-space: normal; min-width: 180px; }
 
 /* Telefonul și data nu se rup pe două rânduri */
 .rand-detalii span, .intrare-client span { display: inline-block; white-space: nowrap; }
+
+/* Cifrele de pe pagina principală */
+.cifre {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
+  margin: 0 0 16px; padding: 4px 0 16px; border-bottom: 1px solid var(--line);
+}
+.cifre > div { padding: 4px 16px 0; border-left: 1px solid var(--line); }
+.cifre > div:first-child { padding-left: 0; border-left: none; }
+.cifre dt { font-size: 14px; font-weight: 500; color: var(--muted); }
+.cifre dd { margin: 2px 0 2px; font: 500 44px/1 var(--font-display); color: var(--gold-deep); font-variant-numeric: lining-nums; }
+.cifre p { margin: 0; font-size: 13px; color: var(--muted); }
+.cifre .btn-text { min-height: 0; padding: 0; font-size: 13px; }
+@media (max-width: 600px) {
+  .cifre { grid-template-columns: 1fr 1fr; row-gap: 14px; }
+  .cifre > div:nth-child(3) { display: none; }
+  .cifre dd { font-size: 38px; }
+}

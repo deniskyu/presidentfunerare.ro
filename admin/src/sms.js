@@ -35,6 +35,19 @@ export async function trimiteSms(env, telefon, mesaj) {
   }
 }
 
+/** Contoarele de SMS-uri trimise (total și pe lună); doar cresc, chiar dacă se șterg persoane */
+export async function numaraTrimise(db, n) {
+  if (!n) return;
+  await db
+    .prepare(
+      `INSERT INTO setari (cheie, valoare)
+       SELECT value, ?1 FROM json_each(?2) WHERE true
+       ON CONFLICT(cheie) DO UPDATE SET valoare = CAST(valoare AS INTEGER) + ?1`,
+    )
+    .bind(n, JSON.stringify(['sms_trimise_total', `sms_trimise_${aziRO().slice(0, 7)}`]))
+    .run();
+}
+
 /**
  * Întreabă SMSLink câte SMS-uri mai sunt în cont și salvează răspunsul.
  * Răspuns de succes: MESSAGE;2;Credit 10 SMS;10,1214353554 (prima variabilă = numărul de SMS-uri).
@@ -177,6 +190,9 @@ export async function ruleazaTrimiterea(env, { motiv = 'cron' } = {}) {
       .bind(JSON.stringify(actualizari))
       .run();
   }
+  await numaraTrimise(db, rezultat.trimise);
   await scrieSetare(db, 'ultima_rulare', JSON.stringify(rezultat));
+  // După ce au plecat SMS-uri, actualizăm și creditul afișat în panou
+  if (rezultat.trimise) await verificaCredit(env);
   return rezultat;
 }

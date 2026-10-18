@@ -296,6 +296,26 @@
         </div>`;
     }
 
+    const numar = (n) => Number(n).toLocaleString('ro-RO');
+    const areCredit = d.credit && d.credit.credit !== null;
+    const cifre = `
+      <dl class="cifre">
+        <div>
+          <dt>Credit SMSLink</dt>
+          <dd>${areCredit ? numar(d.credit.credit) : '–'}</dd>
+          <p>${areCredit ? `SMS-uri rămase, verificat ${esc(dataOra(d.credit.la))}` : 'Apare după ce legați contul SMSLink'}${eAdmin() ? ' <button class="btn-text btn-mic" id="actualizeaza-credit" type="button">Actualizează</button>' : ''}</p>
+        </div>
+        <div>
+          <dt>SMS-uri trimise</dt>
+          <dd>${numar(d.statistici.trimise_total)}</dd>
+          <p>de la început, ${numar(d.statistici.trimise_luna)} luna aceasta</p>
+        </div>
+        <div>
+          <dt>Persoane în listă</dt>
+          <dd>${numar(d.statistici.persoane)}</dd>
+          <p><a href="#/persoane">Vezi lista</a></p>
+        </div>
+      </dl>`;
     let credit = '';
     if (s.sms_pornit && d.credit) {
       if (d.credit.credit === null) {
@@ -362,12 +382,20 @@
       <div class="titlu-pagina">
         <div>
           <h1>Pomenile următoare</h1>
-          <p class="subtitlu">Următoarele 30 de zile. ${plural(d.statistici.persoane, 'persoană', 'persoane')} în listă, ${plural(d.statistici.trimise_luna, 'SMS trimis', 'SMS-uri trimise')} luna aceasta.</p>
+          <p class="subtitlu">Următoarele 30 de zile.</p>
         </div>
         <a class="btn" href="#/persoane/noua">Adaugă persoană</a>
       </div>
+      ${cifre}
       ${banda}${credit}${verificat}
       ${calendar}`;
+    main.querySelector('#actualizeaza-credit')?.addEventListener('click', (ev) =>
+      cuButon(ev.target, async () => {
+        const r = await api('/sms/credit');
+        if (r.credit === null) notifica(`Nu am putut citi creditul. ${explicaEroare(r.raspuns)}`);
+        paginaAcasa();
+      }),
+    );
   }
 
   // ---------- Pagina: Persoane ----------

@@ -26,7 +26,7 @@ import {
   randeazaMesaj,
 } from './pomeni.js';
 import { citesteSetari } from './setari.js';
-import { ruleazaTrimiterea, trimiteSms, verificaCredit } from './sms.js';
+import { numaraTrimise, ruleazaTrimiterea, trimiteSms, verificaCredit } from './sms.js';
 
 class Eroare extends Error {
   constructor(status, mesaj) {
@@ -272,19 +272,18 @@ ruta('GET', '/api/acasa', async ({ db }) => {
       `SELECT ${coloane} FROM pomeni p JOIN decedati d ON d.id = p.decedat_id
        WHERE p.status IN ('eroare', 'in_curs') ORDER BY p.data_pomana LIMIT 50`,
     ),
-    db
-      .prepare(
-        `SELECT (SELECT COUNT(*) FROM decedati) AS persoane,
-                (SELECT COUNT(*) FROM pomeni WHERE status = 'trimis' AND trimis_la >= ?) AS trimise_luna`,
-      )
-      .bind(azi.slice(0, 8) + '01'),
+    db.prepare('SELECT COUNT(*) AS persoane FROM decedati'),
   ]);
   return json({
     azi,
     setari: { sms_pornit: setari.sms_pornit === '1', zile_inainte: Number(setari.zile_inainte), ani_max: Number(setari.ani_max) },
     urmatoare: urmatoare.results.map((p) => imbogatestePomana(p, setari)),
     de_verificat: deVerificat.results.map((p) => imbogatestePomana(p, setari)),
-    statistici: statistici.results[0],
+    statistici: {
+      persoane: statistici.results[0].persoane,
+      trimise_total: Number(setari.sms_trimise_total || 0),
+      trimise_luna: Number(setari[`sms_trimise_${azi.slice(0, 7)}`] || 0),
+    },
     ultima_rulare: setari.ultima_rulare ? JSON.parse(setari.ultima_rulare) : null,
     credit: setari.credit_sms ? JSON.parse(setari.credit_sms) : null,
   });
@@ -638,6 +637,10 @@ ruta(
     const setari = await citesteSetari(db);
     const mesaj = randeazaMesaj(setari.mesaj, { tip: '40z', nume: 'TOMA MARIA', data_pomana: adaugaZile(aziRO(), 7) });
     const r = await trimiteSms(env, tel.telefon, mesaj);
+    if (r.ok) {
+      await numaraTrimise(db, 1);
+      await verificaCredit(env);
+    }
     return json({ ...r, mesaj }, r.ok ? 200 : 502);
   },
   { admin: true },
