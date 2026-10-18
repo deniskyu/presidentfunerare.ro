@@ -26,7 +26,7 @@ import {
   randeazaMesaj,
 } from './pomeni.js';
 import { citesteSetari } from './setari.js';
-import { creditSmsLink, ruleazaTrimiterea, trimiteSms } from './sms.js';
+import { ruleazaTrimiterea, trimiteSms, verificaCredit } from './sms.js';
 
 class Eroare extends Error {
   constructor(status, mesaj) {
@@ -103,7 +103,13 @@ export default {
     // Cron-ul pornește din oră în oră; trimitem doar între 10:00 și 18:59, ora României (vara și iarna).
     const ora = Number(new Intl.DateTimeFormat('en-GB', { timeZone: FUS_ORAR, hour: '2-digit', hour12: false }).format(new Date()));
     if (ora < 10 || ora >= 19) return;
-    ctx.waitUntil(ruleazaTrimiterea(env, { motiv: 'automat' }));
+    ctx.waitUntil(
+      (async () => {
+        await ruleazaTrimiterea(env, { motiv: 'automat' });
+        // O dată pe zi verificăm și creditul, ca panoul să anunțe din timp când se termină.
+        if (ora === 10 && env.SMSLINK_CONNECTION_ID) await verificaCredit(env);
+      })(),
+    );
   },
 };
 
@@ -280,6 +286,7 @@ ruta('GET', '/api/acasa', async ({ db }) => {
     de_verificat: deVerificat.results.map((p) => imbogatestePomana(p, setari)),
     statistici: statistici.results[0],
     ultima_rulare: setari.ultima_rulare ? JSON.parse(setari.ultima_rulare) : null,
+    credit: setari.credit_sms ? JSON.parse(setari.credit_sms) : null,
   });
 });
 
@@ -636,7 +643,7 @@ ruta(
   { admin: true },
 );
 
-ruta('GET', '/api/sms/credit', async ({ env }) => json({ raspuns: await creditSmsLink(env) }), { admin: true });
+ruta('GET', '/api/sms/credit', async ({ env }) => json(await verificaCredit(env)), { admin: true });
 
 ruta('POST', '/api/ruleaza-acum', async ({ env }) => json(await ruleazaTrimiterea(env, { motiv: 'manual' })), { admin: true });
 

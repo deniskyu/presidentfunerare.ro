@@ -58,6 +58,27 @@
 
   class Neautentificat extends Error {}
 
+  /** Traduce răspunsurile de eroare SMSLink în ce e de făcut */
+  function explicaEroare(raspuns) {
+    const r = String(raspuns || '');
+    const cod = (r.match(/^ERROR;(\d+);/) || [])[1];
+    const explicatii = {
+      8: 'Nu mai e credit în contul SMSLink. Cumpărați un pachet nou din contul SMSLink.',
+      2: 'Connection ID-ul SMSLink e greșit. Verificați secretul SMSLINK_CONNECTION_ID.',
+      7: 'Parola conexiunii SMSLink e greșită. Verificați secretul SMSLINK_PASSWORD.',
+      5: 'Conexiunea SMSLink acceptă doar anumite adrese IP. În SMSLink, la SMS Gateway, permiteți conectarea de pe orice IP.',
+      6: 'SMSLink a blocat temporar conexiunea după prea multe încercări greșite. Reactivați-o din SMS Gateway.',
+      3: 'Contul SMSLink e suspendat sau inactiv. Contactați SMSLink.',
+      4: 'Serviciul SMS Gateway nu e activ în contul SMSLink. Contactați SMSLink.',
+      9: 'Numărul nu e acceptat de SMSLink (numerele din străinătate trebuie activate separat în SMSLink).',
+      10: 'Numărul nu e de mobil, deci SMS-ul nu poate ajunge.',
+      12: 'Mesajul trece de 160 de caractere și SMSLink refuză mesajele lungi. Scurtați textul din Setări.',
+    };
+    if (cod && explicatii[cod]) return `${explicatii[cod]} (${r.slice(0, 120)})`;
+    if (/^Lipsesc datele SMSLink/.test(r)) return 'Datele SMSLink nu sunt încă puse (secretele SMSLINK_CONNECTION_ID și SMSLINK_PASSWORD).';
+    return r || 'Eroare necunoscută';
+  }
+
   async function api(cale, { metoda = 'GET', corp } = {}) {
     const r = await fetch('/api' + cale, {
       method: metoda,
@@ -229,6 +250,13 @@
             metoda: 'POST',
             corp: { utilizator: form.utilizator.value, parola: form.parola.value },
           });
+          // Verificăm că browserul a păstrat logarea (unele browsere blochează cookie-urile)
+          const verificare = await fetch('/api/eu', { headers: { 'X-Cerere': '1' }, credentials: 'same-origin' });
+          if (verificare.status === 401) {
+            throw new Error(
+              'Parola e corectă, dar browserul nu a păstrat logarea. Deschideți adresa direct în Safari sau Chrome (nu din WhatsApp sau alte aplicații) și verificați să nu fie blocate cookie-urile.',
+            );
+          }
           stare.eu = r.utilizator;
           cadru();
           navigheaza();
@@ -268,6 +296,14 @@
         </div>`;
     }
 
+    let credit = '';
+    if (s.sms_pornit && d.credit) {
+      if (d.credit.credit === null) {
+        credit = `<div class="banda banda-eroare"><p><b>Nu am putut verifica creditul SMSLink.</b> ${esc(explicaEroare(d.credit.raspuns))}</p></div>`;
+      } else if (d.credit.credit < 30) {
+        credit = `<div class="banda banda-oprit"><p><span class="punct"></span><b>Mai sunt doar ${plural(d.credit.credit, 'SMS', 'SMS-uri')} în contul SMSLink.</b> Cumpărați un pachet nou ca trimiterea să nu se oprească.</p></div>`;
+      }
+    }
     let verificat = '';
     if (d.de_verificat.length) {
       verificat = `
@@ -330,7 +366,7 @@
         </div>
         <a class="btn" href="#/persoane/noua">Adaugă persoană</a>
       </div>
-      ${banda}${verificat}
+      ${banda}${credit}${verificat}
       ${calendar}`;
   }
 
@@ -431,7 +467,7 @@
               </div>
               <div>${eticheta(st)}</div>
               <div class="pomana-mesaj">${esc(x.mesaj_previzualizare)}${x.segmente > 1 ? `<br><b>Atenție:</b> mesajul ocupă ${x.segmente} SMS-uri.` : ''}</div>
-              ${x.status === 'eroare' || (x.incercari && x.status === 'asteptare') ? `<div class="pomana-eroare">Răspuns SMSLink: ${esc(x.raspuns || 'necunoscut')}</div>` : ''}
+              ${x.status === 'eroare' || (x.incercari && x.status === 'asteptare') ? `<div class="pomana-eroare">${esc(explicaEroare(x.raspuns))}</div>` : ''}
               ${butoane.length ? `<div class="actiuni">${butoane.map(([a, t]) => `<button class="btn-text" data-actiune="${a}" data-id="${x.id}">${t}</button>`).join('')}</div>` : ''}
             </div>`;
           })
@@ -747,7 +783,7 @@
               <div class="rand-titlu">${esc(x.nume_sms)}</div>
               <div class="rand-detalii"><span>Pomenirea de ${esc(x.pomana)}, ${esc(dataScurta(x.data_pomana))}</span><span>${esc(frumos(x.client))}</span><span>${esc(telefonAfisat(x.telefon))}</span></div>
               ${x.mesaj && x.status === 'trimis' ? `<div class="rand-detalii" style="margin-top:4px">${esc(x.mesaj)}</div>` : ''}
-              ${x.status !== 'trimis' && x.raspuns ? `<div class="rand-detalii" style="color:var(--bad);margin-top:4px">${esc(x.raspuns)}</div>` : ''}
+              ${x.status !== 'trimis' && x.raspuns ? `<div class="rand-detalii" style="color:var(--bad);margin-top:4px">${esc(explicaEroare(x.raspuns))}</div>` : ''}
             </div>
             <div class="rand-dreapta">${eticheta({ text: t, cls: c })}${cand ? `<div class="slab mic" style="margin-top:6px">${esc(dataOra(cand))}</div>` : ''}</div>
           </a></li>`;
@@ -897,14 +933,16 @@
           const r = await api('/sms/test', { metoda: 'POST', corp: { telefon: main.querySelector('#tel-test').value } });
           rezultat.textContent = `SMS-ul de test a plecat. Răspuns SMSLink: ${r.raspuns}`;
         } catch (e) {
-          rezultat.textContent = `SMS-ul de test nu a plecat. ${e.date?.raspuns || e.message}`;
+          rezultat.textContent = `SMS-ul de test nu a plecat. ${e.date?.raspuns ? explicaEroare(e.date.raspuns) : e.message}`;
         }
       }),
     );
     main.querySelector('#credit').addEventListener('click', (ev) =>
       cuButon(ev.target, async () => {
         const r = await api('/sms/credit');
-        rezultat.textContent = `Răspuns SMSLink: ${r.raspuns}`;
+        rezultat.textContent = r.credit !== null
+          ? `Mai aveți ${plural(r.credit, 'SMS', 'SMS-uri')} în contul SMSLink.`
+          : `Nu am putut citi creditul. ${explicaEroare(r.raspuns)}`;
       }),
     );
     main.querySelector('#ruleaza').addEventListener('click', (ev) =>

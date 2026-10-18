@@ -35,9 +35,21 @@ export async function trimiteSms(env, telefon, mesaj) {
   }
 }
 
+/**
+ * Întreabă SMSLink câte SMS-uri mai sunt în cont și salvează răspunsul.
+ * Răspuns de succes: MESSAGE;2;Credit 10 SMS;10,1214353554 (prima variabilă = numărul de SMS-uri).
+ */
+export async function verificaCredit(env) {
+  const raspuns = await creditSmsLink(env);
+  const m = raspuns.match(/^MESSAGE;2;[^;]*;(\d+)/);
+  const credit = { credit: m ? Number(m[1]) : null, raspuns, la: new Date().toISOString() };
+  await scrieSetare(env.DB, 'credit_sms', JSON.stringify(credit));
+  return credit;
+}
+
 export async function creditSmsLink(env) {
-  if (env.SMS_MOCK === '1') return 'MESSAGE;2;Credit (simulat local);100';
-  if (!env.SMSLINK_CONNECTION_ID || !env.SMSLINK_PASSWORD) return 'Lipsesc datele SMSLink.';
+  if (env.SMS_MOCK === '1') return 'MESSAGE;2;Credit 100 SMS;100,0';
+  if (!env.SMSLINK_CONNECTION_ID || !env.SMSLINK_PASSWORD) return 'Lipsesc datele SMSLink (secretele SMSLINK_CONNECTION_ID și SMSLINK_PASSWORD).';
   const url = new URL(ENDPOINT_SMSLINK);
   url.search = new URLSearchParams({
     connection_id: env.SMSLINK_CONNECTION_ID,

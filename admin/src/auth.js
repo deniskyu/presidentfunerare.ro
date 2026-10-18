@@ -1,6 +1,7 @@
 // Conturi, parole și sesiuni.
 // Parolele se salvează doar ca hash PBKDF2-SHA256 cu sare unică.
 // Sesiunea e un cookie semnat (HMAC) care se reînnoiește singur cât timp contul e folosit.
+// SameSite=Lax: cu Strict, Safari pe iPhone pierde uneori logarea; protecția CSRF vine din antetul X-Cerere.
 
 const enc = new TextEncoder();
 // 20.000 de iterații încap în cele 10 ms de procesor ale planului gratuit Cloudflare.
@@ -51,11 +52,11 @@ export async function cookieSesiune(env, utilizator) {
   const expira = Math.floor(Date.now() / 1000) + DURATA_SESIUNE;
   const continut = `${utilizator.id}.${utilizator.versiune}.${expira}`;
   const valoare = `${continut}.${await semnatura(env.SESSION_SECRET, continut)}`;
-  return `${NUME_COOKIE}=${valoare}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${DURATA_SESIUNE}`;
+  return `${NUME_COOKIE}=${valoare}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${DURATA_SESIUNE}`;
 }
 
 export function cookieStergere() {
-  return `${NUME_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`;
+  return `${NUME_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`;
 }
 
 function citesteCookie(request, nume) {
